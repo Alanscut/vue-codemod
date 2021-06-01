@@ -35,12 +35,13 @@ async function main() {
   const transformationModule = loadTransformationModule(transformationName)
 
   log(`Processing ${resolvedPaths.length} files…`)
-
+  // 批量文件依次转换
   for (const p of resolvedPaths) {
     debug(`Processing ${p}…`)
+    // TODO:在此处判断哪些类型的文件才需要转换
     const fileInfo = {
       path: p,
-      source: fs.readFileSync(p).toString(),
+      source: fs.readFileSync(p).toString(),  // 读取待转换文件文本内容
     }
     try {
       const result = runTransformation(
@@ -48,7 +49,7 @@ async function main() {
         transformationModule,
         params as object
       )
-      fs.writeFileSync(p, result)
+      fs.writeFileSync(p, result) // 处理后的文件内容回写
     } catch (e) {
       console.error(e)
     }
@@ -62,10 +63,12 @@ main().catch((err) => {
 
 function loadTransformationModule(nameOrPath: string) {
   let transformation = builtInTransformations[nameOrPath]
+  // 基于规则名称找到对应的映射JS文件
   if (transformation) {
     return transformation
   }
 
+  // 没有找到默认的规则时，寻找自定义规则文件
   const customModulePath = path.resolve(process.cwd(), nameOrPath)
   if (fs.existsSync(customModulePath)) {
     const requireFunc = Module.createRequire(
