@@ -16,7 +16,7 @@ export default function astTransformationToJSCodeshiftModule<Params = any>(
   const transform: Transform = (file, api, options: Params) => {
     const j = api.jscodeshift
     const root = j(file.source)
-
+    // 通过 jscodeshift的j、root、file等构造 context , options 作为可选参数
     transformAST({ root, j, filename: file.path }, options)
 
     return root.toSource({ lineTerminator: '\n' })

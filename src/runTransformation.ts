@@ -8,6 +8,8 @@ import type { SFCDescriptor } from './sfcUtils'
 
 import VueTransformation from './VueTransformation'
 
+import * as vueParser from 'vue-eslint-parser'
+
 const debug = createDebug('vue-codemod')
 
 type FileInfo = {
@@ -50,64 +52,77 @@ export default function runTransformation(
 
   if (transformation instanceof VueTransformation) {
     debug('TODO: Running VueTransformation')
-    return fileInfo.source
-  }
+    // 从 fileInfo 中取出文件路径和源码
+    // const { path, source } = fileInfo
 
-  debug('Running jscodeshift transform')
-
-  const { path, source } = fileInfo
-  const extension = (/\.([^.]*)$/.exec(path) || [])[0]
-  let lang = extension.slice(1)
-
-  let descriptor: SFCDescriptor
-  if (extension === '.vue') {
-    descriptor = parseSFC(source, { filename: path }).descriptor
-
-    // skip .vue files without script block
-    if (!descriptor.script) {
-      return source
+    const api = {
+      vueParser,
+      // stats: () => {},
+      report: () => {},
     }
 
-    lang = descriptor.script.lang || 'js'
-    fileInfo.source = descriptor.script.content
-  }
+    const out = transformation(fileInfo, api, params) // 用vueTransformation 对文件进行处理
 
-  let parser = getParser()
-  let parserOption = (transformationModule as JSTransformationModule).parser
-  // force inject `parser` option for .tsx? files, unless the module specifies a custom implementation
-  if (typeof parserOption !== 'object') {
-    if (lang.startsWith('ts')) {
-      parserOption = lang
-    }
-  }
+    return out
+  } else {
+    debug('Running jscodeshift transform')
 
-  if (parserOption) {
-    parser =
-      typeof parserOption === 'string' ? getParser(parserOption) : parserOption
-  }
+    const { path, source } = fileInfo
+    const extension = (/\.([^.]*)$/.exec(path) || [])[0]
+    let lang = extension.slice(1)
 
-  const j = jscodeshift.withParser(parser)
-  const api = {
-    j,
-    jscodeshift: j,
-    stats: () => {},
-    report: () => {},
-  }
+    let descriptor: SFCDescriptor
+    if (extension === '.vue') {
+      descriptor = parseSFC(source, { filename: path }).descriptor
 
-  const out = transformation(fileInfo, api, params)
-  if (!out) {
-    return source // skipped
-  }
+      // skip .vue files without script block
+      if (!descriptor.script) {
+        return source
+      }
 
-  // need to reconstruct the .vue file from descriptor blocks
-  if (extension === '.vue') {
-    if (out === descriptor!.script!.content) {
-      return source // skipped, don't bother re-stringifying
+      lang = descriptor.script.lang || 'js'
+      fileInfo.source = descriptor.script.content
     }
 
-    descriptor!.script!.content = out
-    return stringifySFC(descriptor!)
-  }
+    let parser = getParser()
+    let parserOption = (transformationModule as JSTransformationModule).parser
+    // force inject `parser` option for .tsx? files, unless the module specifies a custom implementation
+    if (typeof parserOption !== 'object') {
+      if (lang.startsWith('ts')) {
+        parserOption = lang
+      }
+    }
 
-  return out
+    if (parserOption) {
+      parser =
+        typeof parserOption === 'string'
+          ? getParser(parserOption)
+          : parserOption
+    }
+
+    const j = jscodeshift.withParser(parser)
+    const api = {
+      j,
+      jscodeshift: j,
+      stats: () => {},
+      report: () => {},
+    }
+
+    const out = transformation(fileInfo, api, params)
+    if (!out) {
+      return source // skipped
+    }
+
+    // need to reconstruct the .vue file from descriptor blocks
+    if (extension === '.vue') {
+      if (out === descriptor!.script!.content) {
+        return source // skipped, don't bother re-stringifying
+      }
+
+      descriptor!.script!.content = out
+      return stringifySFC(descriptor!)
+    }
+
+    return out
+  }
 }
