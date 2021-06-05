@@ -1,4 +1,4 @@
-
+import { API } from 'jscodeshift';
 
 interface FileInfo {
   /** The absolute path to the current file. */
@@ -7,28 +7,27 @@ interface FileInfo {
   source: string;
 }
 
-interface API {
-  j: JSCodeshift;
-  jscodeshift: JSCodeshift;
-  // stats: Stats;
-  report: (msg: string) => void;
-}
+// interface API {
+//   parser: vueParser;
+//   // stats: Stats;
+//   report: (msg: string) => void;
+// }
 
 interface Options {
   [option: string]: any;
 }
-export interface VueTransform {
+export default interface VueTransformation {
 
-  (file: FileInfo, api: API, options: Options): string | null | undefined | void;
+  (file: FileInfo, api:API, options: Options): string | null | undefined | void;
 
   // findNode(rootAst);
   // fix(node)
   // apply(fixers, sourceCode)
 }
 
-export default abstract class VueTransformation {
-  // TODO:
+// export default abstract class VueTransformation {
+//   // TODO:
   
-}
+// }
 
 
