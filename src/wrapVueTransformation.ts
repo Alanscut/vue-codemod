@@ -1,14 +1,40 @@
 import * as _ from 'lodash'
-import assert from "assert";
-import type { Operation } from "./operationUtils";
-const BOM = "\uFEFF";
+import assert from 'assert'
+import type { Operation } from './operationUtils'
+import type VueTransformation from './VueTransformation'
+import { API, FileInfo } from 'jscodeshift'
+
+const BOM = '\uFEFF'
+
+export type Context = {
+  file: FileInfo,
+  api: API
+}
+
+export type VueASTTransformation<Params = void> = {
+  (context: Context, params: Params): Operation[]
+}
+
+export default function astTransformationToVueTransformationModule<
+  Params = any
+>(transformAST: VueASTTransformation<Params>): VueTransformation {
+  const transform: VueTransformation = (file, api, options: Params) => {
+    const source = file.source
+    // 通过 jscodeshift的j、root、file等构造 context , options 作为可选参数
+    const fixOperations: Operation[] = transformAST({ file, api }, options)
+
+    return applyOperation(source, fixOperations)
+  }
+
+  return transform
+}
 
 /**
  * Modify source files
  * @param sourceCode File's source code
  * @param tempOperations Modify the object
  */
-export default function applyOperation(sourceCode: string, tempOperations: Operation[]) {
+export function applyOperation(sourceCode: string, tempOperations: Operation[]) {
   // clone the array
   const bom = sourceCode.startsWith(BOM) ? BOM : "",
     text: string = bom ? sourceCode.slice(1) : sourceCode;

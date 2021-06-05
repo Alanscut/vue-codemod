@@ -1,9 +1,8 @@
 import type VueTransform from '../src/VueTransformation'
-import * as Parser from "vue-eslint-parser";
 
 type VueTransformationModule = {
   default: VueTransform
-  parser?: string | Parser
+  parser?: string
 }
 
 const transformationMap: {

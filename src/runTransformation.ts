@@ -8,8 +8,6 @@ import type { SFCDescriptor } from './sfcUtils'
 
 import VueTransformation from './VueTransformation'
 
-import * as vueParser from 'vue-eslint-parser'
-
 const debug = createDebug('vue-codemod')
 
 type FileInfo = {
@@ -55,12 +53,14 @@ export default function runTransformation(
     // 从 fileInfo 中取出文件路径和源码
     // const { path, source } = fileInfo
 
+    const j = jscodeshift.getParser('babylon')
     const api = {
-      vueParser,
-      // stats: () => {},
+      j,
+      jscodeshift: j,
+      stats: () => {},
       report: () => {},
     }
-
+    // 其实第二个参数 api 无用
     const out = transformation(fileInfo, api, params) // 用vueTransformation 对文件进行处理
 
     return out
