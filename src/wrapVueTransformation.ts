@@ -1,5 +1,4 @@
 import * as _ from 'lodash'
-import assert from "assert";
 import type { Operation } from "./operationUtils";
 const BOM = "\uFEFF";
 
@@ -12,7 +11,7 @@ export default function applyOperation(sourceCode: string, tempOperations: Opera
   // clone the array
   const bom = sourceCode.startsWith(BOM) ? BOM : "",
     text: string = bom ? sourceCode.slice(1) : sourceCode;
-  let lastPos: number = Number.MAX_VALUE,
+  let lastPos: number = Number.MIN_VALUE,
     output: string = bom;
 
   let applyOperations: Operation[] = [];
@@ -28,6 +27,9 @@ export default function applyOperation(sourceCode: string, tempOperations: Opera
   for (const operation of applyOperations.sort(compareOperationsByRange)) {
     attemptOperation(operation);
   }
+
+  // all fix were recovered.
+  output += text.slice(Math.max(0, lastPos));
 
   return output;
 
@@ -67,10 +69,6 @@ export default function applyOperation(sourceCode: string, tempOperations: Opera
    * @returns {{text: string, range: number[]}} The merged operations
    */
 function mergeOperations(operations: Operation[], sourceCode: String): Operation | null {
-  for (const operation of operations) {
-    assertValidOperation(operation);
-  }
-
   if (operations.length === 0) {
     return null;
   }
@@ -87,10 +85,9 @@ function mergeOperations(operations: Operation[], sourceCode: String): Operation
   let lastPos: number = Number.MIN_SAFE_INTEGER;
 
   for (const operation of operations) {
-    assert(
-      operation.range[0] >= lastPos,
-      "Invalid Operation."
-    );
+    if (operation.range[0] < lastPos) {
+      continue;
+    }
 
     if (operation.range[0] >= 0) {
       text += originalText.slice(Math.max(0, start, lastPos), operation.range[0]);
@@ -111,20 +108,4 @@ function mergeOperations(operations: Operation[], sourceCode: String): Operation
  */
 function compareOperationsByRange(a: Operation, b: Operation): number {
   return a.range[0] - b.range[0] || a.range[1] - b.range[1];
-}
-
-/**
- * Check that a operation has a valid range.
- * @param {Operation|null} operation The operation to validate.
- * @returns {void}
- */
-function assertValidOperation(operation: Operation): void {
-  if (operation) {
-    assert(
-      operation.range &&
-      typeof operation.range[0] === "number" &&
-      typeof operation.range[1] === "number",
-      `Operation has invalid range: ${JSON.stringify(operation, null, 2)}`
-    );
-  }
 }
