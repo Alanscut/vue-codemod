@@ -1,27 +1,27 @@
-import type { Node } from "vue-eslint-parser/ast/nodes";
-import type { Token } from "vue-eslint-parser/ast/tokens";
+import type { Node } from 'vue-eslint-parser/ast/nodes'
+import type { Token } from 'vue-eslint-parser/ast/tokens'
 // import * as fixutils from "./fixUtils";
 export type Operation = {
-  nodeRange: number[],
-  range: number[],
-  text: string,
-};
+  nodeRange: number[]
+  range: number[]
+  text: string
+}
 // TODO: for simplicity of implementation, we've skipped all `{ ...expr }` cases
 
 /**
-* Creates a fix command that inserts text at the specified index in the source text.
-* @param {int} index The 0-based index at which to insert the new text.
-* @param {string} text The text to insert.
-* @returns {Object} The fix command.
-* @private
-*/
+ * Creates a fix command that inserts text at the specified index in the source text.
+ * @param {int} index The 0-based index at which to insert the new text.
+ * @param {string} text The text to insert.
+ * @returns {Object} The fix command.
+ * @private
+ */
 export function insertTextAt(index: number, text: string): Operation {
   return {
+    nodeRange: [index, index],
     range: [index, index],
-    text
-  } as Operation;
+    text,
+  }
 }
-
 
 /**
  * Creates a fix command that inserts text after the given node or token.
@@ -30,8 +30,13 @@ export function insertTextAt(index: number, text: string): Operation {
  * @param {string} text The text to insert.
  * @returns {Object} The fix command.
  */
-export function insertTextAfter(nodeOrToken: Node | Token, text: string): Operation {
-  return insertTextAfterRange(nodeOrToken.range, text) as Operation;
+export function insertTextAfter(
+  nodeOrToken: Node | Token,
+  text: string
+): Operation {
+  var operation = insertTextAfterRange(nodeOrToken.range, text)
+  operation.nodeRange = nodeOrToken.range
+  return operation
 }
 
 /**
@@ -43,7 +48,7 @@ export function insertTextAfter(nodeOrToken: Node | Token, text: string): Operat
  * @returns {Object} The fix command.
  */
 export function insertTextAfterRange(range: number[], text: string): Operation {
-  return insertTextAt(range[1], text) as Operation;
+  return insertTextAt(range[1], text)
 }
 
 /**
@@ -53,8 +58,13 @@ export function insertTextAfterRange(range: number[], text: string): Operation {
  * @param {string} text The text to insert.
  * @returns {Object} The fix command.
  */
-export function insertTextBefore(nodeOrToken: Node | Token, text: string): Operation {
-  return insertTextBeforeRange(nodeOrToken.range, text) as Operation;
+export function insertTextBefore(
+  nodeOrToken: Node | Token,
+  text: string
+): Operation {
+  var operation = insertTextBeforeRange(nodeOrToken.range, text)
+  operation.nodeRange = nodeOrToken.range
+  return operation
 }
 
 /**
@@ -65,8 +75,13 @@ export function insertTextBefore(nodeOrToken: Node | Token, text: string): Opera
  * @param {string} text The text to insert.
  * @returns {Object} The fix command.
  */
-export function insertTextBeforeRange(range: number[], text: string): Operation {
-  return insertTextAt(range[0], text) as Operation;
+export function insertTextBeforeRange(
+  range: number[],
+  text: string
+): Operation {
+  var operation = insertTextAt(range[0], text)
+  operation.nodeRange = range
+  return operation
 }
 
 /**
@@ -76,8 +91,13 @@ export function insertTextBeforeRange(range: number[], text: string): Operation 
  * @param {string} text The text to insert.
  * @returns {Object} The fix command.
  */
-export function replaceText(nodeOrToken: Node | Token, text: string): Operation {
-  return replaceTextRange(nodeOrToken.range, text) as Operation;
+export function replaceText(
+  nodeOrToken: Node | Token,
+  text: string
+): Operation {
+  var operation = replaceTextRange(nodeOrToken.range, text)
+  operation.nodeRange = nodeOrToken.range
+  return operation
 }
 
 /**
@@ -92,8 +112,8 @@ export function replaceTextRange(range: number[], text: string): Operation {
   return {
     nodeRange: range,
     range,
-    text
-  } as Operation;
+    text,
+  }
 }
 
 /**
@@ -103,7 +123,9 @@ export function replaceTextRange(range: number[], text: string): Operation {
  * @returns {Object} The fix command.
  */
 export function remove(nodeOrToken: Node | Token): Operation {
-  return removeRange(nodeOrToken.range) as Operation;
+  var operation = removeRange(nodeOrToken.range)
+  operation.nodeRange = nodeOrToken.range
+  return operation
 }
 
 /**
@@ -117,6 +139,6 @@ export function removeRange(range: number[]): Operation {
   return {
     nodeRange: range,
     range,
-    text: ""
-  } as Operation;
+    text: '',
+  }
 }
