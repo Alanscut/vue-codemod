@@ -46,12 +46,10 @@ export function applyOperation(sourceCode: string, tempOperations: Operation[]) 
   let applyOperations: Operation[] = [];
 
   // The Lodash grouping function is called to group the objects in the array according to range
-  _.forEach(_.groupBy(tempOperations, "range"), (value: any, key: string) => {
-    let tempOperation: Operation | null = mergeOperations(value, text)
-    if (tempOperation) {
-      applyOperations.push(tempOperation);
-    }
-  });
+  let tempOperation: Operation | null = mergeOperations(tempOperations, text)
+  if (tempOperation) {
+    applyOperations.push(tempOperation)
+  }
 
   for (const operation of applyOperations.sort(compareOperationsByRange)) {
     attemptOperation(operation);
