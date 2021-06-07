@@ -1,4 +1,4 @@
-import applyOperation from './src/wrapVueTransformation'
+import { applyOperation } from './src/wrapVueTransformation'
 console.log("----->", "test index.js begin")
 const sourceCode = `<template>
 <div id="app">

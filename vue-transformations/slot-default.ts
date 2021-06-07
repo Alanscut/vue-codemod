@@ -40,7 +40,15 @@ function findNodes(context: any): Node[] {
   var root: Node = <Node>ast.templateBody // 强制类型转换
   parser.AST.traverseNodes(root, {
     enterNode(node: Node) {
-      if (node.type === 'VAttribute' && node.key.name === 'slot') {
+      if (
+        node.type === 'VAttribute' &&
+        node.key.type === 'VDirectiveKey' &&
+        node.key.name.name === 'slot' &&
+        node.key.argument?.type === 'VIdentifier' &&
+        node.key.argument?.name === 'default' &&
+        node.parent.parent.type == 'VElement' &&
+        node.parent.parent.name == 'template'
+      ) {
         toFixNodes.push(node)
       }
     },
@@ -57,17 +65,12 @@ function fix(node: Node): Operation[] {
   var fixOperations: Operation[] = []
 
   const target: any = node!.parent!.parent // any 需要优化
-  // @ts-ignore
-  const slotValue: string = node!.value!.value
+  const targetParent: any = target.parent
 
-  // remove v-slot:${slotValue}
-  fixOperations.push(OperationUtils.remove(node))
-  // add <template v-slot:${slotValue}>
-  fixOperations.push(
-    OperationUtils.insertTextBefore(target, `<template v-slot:${slotValue}>`)
-  )
-  // add </template>
-  fixOperations.push(OperationUtils.insertTextAfter(target, `</template>`))
-
+  targetParent.children
+    .filter((el: any) => el.type == 'VElement' && el.name != 'template')
+    .forEach((element: any) => {
+      fixOperations.push(OperationUtils.remove(element))
+    })
   return fixOperations
 }

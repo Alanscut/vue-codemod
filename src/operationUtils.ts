@@ -2,7 +2,6 @@ import type { Node } from 'vue-eslint-parser/ast/nodes'
 import type { Token } from 'vue-eslint-parser/ast/tokens'
 // import * as fixutils from "./fixUtils";
 export type Operation = {
-  nodeRange: number[]
   range: number[]
   text: string
 }
@@ -17,7 +16,6 @@ export type Operation = {
  */
 export function insertTextAt(index: number, text: string): Operation {
   return {
-    nodeRange: [index, index],
     range: [index, index],
     text,
   }
@@ -34,9 +32,7 @@ export function insertTextAfter(
   nodeOrToken: Node | Token,
   text: string
 ): Operation {
-  var operation = insertTextAfterRange(nodeOrToken.range, text)
-  operation.nodeRange = nodeOrToken.range
-  return operation
+  return insertTextAfterRange(nodeOrToken.range, text)
 }
 
 /**
@@ -62,9 +58,7 @@ export function insertTextBefore(
   nodeOrToken: Node | Token,
   text: string
 ): Operation {
-  var operation = insertTextBeforeRange(nodeOrToken.range, text)
-  operation.nodeRange = nodeOrToken.range
-  return operation
+  return insertTextBeforeRange(nodeOrToken.range, text)
 }
 
 /**
@@ -79,9 +73,7 @@ export function insertTextBeforeRange(
   range: number[],
   text: string
 ): Operation {
-  var operation = insertTextAt(range[0], text)
-  operation.nodeRange = range
-  return operation
+  return insertTextAt(range[0], text)
 }
 
 /**
@@ -95,9 +87,7 @@ export function replaceText(
   nodeOrToken: Node | Token,
   text: string
 ): Operation {
-  var operation = replaceTextRange(nodeOrToken.range, text)
-  operation.nodeRange = nodeOrToken.range
-  return operation
+  return replaceTextRange(nodeOrToken.range, text)
 }
 
 /**
@@ -110,7 +100,6 @@ export function replaceText(
  */
 export function replaceTextRange(range: number[], text: string): Operation {
   return {
-    nodeRange: range,
     range,
     text,
   }
@@ -123,9 +112,7 @@ export function replaceTextRange(range: number[], text: string): Operation {
  * @returns {Object} The fix command.
  */
 export function remove(nodeOrToken: Node | Token): Operation {
-  var operation = removeRange(nodeOrToken.range)
-  operation.nodeRange = nodeOrToken.range
-  return operation
+  return removeRange(nodeOrToken.range)
 }
 
 /**
@@ -137,7 +124,6 @@ export function remove(nodeOrToken: Node | Token): Operation {
  */
 export function removeRange(range: number[]): Operation {
   return {
-    nodeRange: range,
     range,
     text: '',
   }

@@ -16,6 +16,7 @@ type FileInfo = {
 }
 
 type JSTransformation = Transform & {
+  type: 'JSTransformation'
   parser?: string | Parser
 }
 
@@ -29,13 +30,13 @@ type JSTransformationModule =
 type VueTransformationModule =
   | VueTransformation
   | {
-      default: VueTransformation
+      default: VueTransformation,
     }
 
 type TransformationModule = JSTransformationModule | VueTransformationModule
 
 export default function runTransformation(
-  fileInfo: FileInfo,
+  fileInfo: FileInfo, // 自定义 FileInfo 类型
   transformationModule: TransformationModule,
   params: object = {}
 ) {
@@ -45,27 +46,17 @@ export default function runTransformation(
     // @ts-ignore
     transformation = transformationModule.default
   } else {
+    // @ts-ignore
     transformation = transformationModule
   }
 
-  if (transformation instanceof VueTransformation) {
+  if (transformation.type === 'vueTransformation') {
     debug('TODO: Running VueTransformation')
-    // 从 fileInfo 中取出文件路径和源码
-    // const { path, source } = fileInfo
 
-    const j = jscodeshift.getParser('babylon')
-    const api = {
-      j,
-      jscodeshift: j,
-      stats: () => {},
-      report: () => {},
-    }
-    // 其实第二个参数 api 无用
-    const out = transformation(fileInfo, api, params) // 用vueTransformation 对文件进行处理
-
+    const out = transformation(fileInfo, params)
     return out
   } else {
-    debug('Running jscodeshift transform')
+    debug('Running jscodeshift transform')    
 
     const { path, source } = fileInfo
     const extension = (/\.([^.]*)$/.exec(path) || [])[0]

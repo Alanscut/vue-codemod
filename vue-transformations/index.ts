@@ -1,14 +1,14 @@
-import type VueTransform from '../src/VueTransformation'
+import type VueTransformation from '../src/VueTransformation'
 
 type VueTransformationModule = {
-  default: VueTransform
-  parser?: string
+  default: VueTransformation
 }
 
 const transformationMap: {
   [name: string]: VueTransformationModule
 } = {
   'slot-attribute': require('./slot-attribute'),
+  'slot-default': require('./slot-default'),
 }
 
 export default transformationMap

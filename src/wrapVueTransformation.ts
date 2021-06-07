@@ -1,29 +1,35 @@
 import * as _ from 'lodash'
 import type { Operation } from './operationUtils'
 import type VueTransformation from './VueTransformation'
-import { API, FileInfo } from 'jscodeshift'
 
 const BOM = '\uFEFF'
 
+type FileInfo = {
+  path: string
+  source: string
+}
+
 export type Context = {
   file: FileInfo,
-  api: API
 }
 
 export type VueASTTransformation<Params = void> = {
-  (context: Context, params: Params): Operation[]
+  (context: Context, params: Params): Operation[],
+  type?: string  // 标志位，用于判断是 VueTransformation 还是 JSTransformation
 }
 
 export default function astTransformationToVueTransformationModule<
   Params = any
 >(transformAST: VueASTTransformation<Params>): VueTransformation {
-  const transform: VueTransformation = (file, api, options: Params) => {
+  const transform: VueTransformation = (file, options: Params) => {
     const source = file.source
-    // 通过 jscodeshift的j、root、file等构造 context , options 作为可选参数
-    const fixOperations: Operation[] = transformAST({ file, api }, options)
+    // 通过 file构造 context , options 作为可选参数
+    const fixOperations: Operation[] = transformAST({ file }, options)
 
     return applyOperation(source, fixOperations)
   }
+
+  transform.type = "vueTransformation"  // 标志位用于判断是否是 vueTransformation
 
   return transform
 }
@@ -42,13 +48,11 @@ export function applyOperation(sourceCode: string, tempOperations: Operation[]) 
 
   let applyOperations: Operation[] = [];
 
-  // The Lodash grouping function is called to group the objects in the array according to nodeRange
-  _.forEach(_.groupBy(tempOperations, "nodeRange"), (value: any, key: string) => {
-    let tempOperation: Operation | null = mergeOperations(value, text)
-    if (tempOperation) {
-      applyOperations.push(tempOperation);
-    }
-  });
+  // The Lodash grouping function is called to group the objects in the array according to range
+  let tempOperation: Operation | null = mergeOperations(tempOperations, text)
+  if (tempOperation) {
+    applyOperations.push(tempOperation)
+  }
 
   for (const operation of applyOperations.sort(compareOperationsByRange)) {
     attemptOperation(operation);
