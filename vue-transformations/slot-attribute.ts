@@ -3,9 +3,7 @@ import * as OperationUtils from '../src/operationUtils'
 import type { Operation } from '../src/operationUtils'
 import type { VueASTTransformation } from '../src/wrapVueTransformation'
 import * as parser from 'vue-eslint-parser'
-import wrap from '../src/wrapVueTransformation'
-import { Node } from 'jscodeshift'
- 
+import wrap from '../src/wrapVueTransformation' 
 
 /**
  * 每一个实际的规则，需要做以下几件事：
@@ -39,7 +37,7 @@ function findNodes(context: any): Node[] {
   const options = { sourceType: 'module' }
   const ast = parser.parse(source, options)
   var toFixNodes: Node[] = []
-  var root: Node = ast.templateBody
+  var root: Node = <Node> ast.templateBody  // 强制类型转换
   parser.AST.traverseNodes(root, {
     enterNode(node: Node) {
       if (node.type === 'VAttribute' && node.key.name === 'slot') {
@@ -59,6 +57,7 @@ function findNodes(context: any): Node[] {
  */
 function fix(node: Node): Operation[] {
   const target: any = node!.parent!.parent // any 需要优化
+  // @ts-ignore
   const slotValue: string = node!.value!.value
 
   var fixOperations: Operation[] = []

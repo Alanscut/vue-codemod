@@ -1,7 +1,7 @@
-import type VueTransform from '../src/VueTransformation'
+import type VueTransformation from '../src/VueTransformation'
 
 type VueTransformationModule = {
-  default: VueTransform
+  default: VueTransformation
   parser?: string
 }
 

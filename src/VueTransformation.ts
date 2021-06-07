@@ -19,6 +19,7 @@ interface Options {
 export default interface VueTransformation {
 
   (file: FileInfo, api:API, options: Options): string | null | undefined | void;
+  type?: 'vueTransformation'
 
   // findNode(rootAst);
   // fix(node)

@@ -11,7 +11,8 @@ export type Context = {
 }
 
 export type VueASTTransformation<Params = void> = {
-  (context: Context, params: Params): Operation[]
+  (context: Context, params: Params): Operation[],
+  type?: 'vueTransformation'
 }
 
 export default function astTransformationToVueTransformationModule<
@@ -24,6 +25,8 @@ export default function astTransformationToVueTransformationModule<
 
     return applyOperation(source, fixOperations)
   }
+
+  transform.type = "vueTransformation"
 
   return transform
 }
