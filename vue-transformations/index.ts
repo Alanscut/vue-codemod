@@ -9,6 +9,7 @@ const transformationMap: {
   [name: string]: VueTransformationModule
 } = {
   'slot-attribute': require('./slot-attribute'),
+  'slot-default': require('./slot-default'),
 }
 
 export default transformationMap
