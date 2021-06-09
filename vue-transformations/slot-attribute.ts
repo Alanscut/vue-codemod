@@ -57,31 +57,17 @@ function fix(node: Node): Operation[] {
   var fixOperations: Operation[] = []
 
   const target: any = node!.parent!.parent // any 需要优化
-  const targetParent: any = target.parent
   // @ts-ignore
   const slotValue: string = node!.value!.value
 
-  // find <template v-slot:default>
-  const matchedSlot = targetParent.children.filter(
-    (child: any) =>
-      child.type == 'VElement' &&
-      child.name == 'template' &&
-      child.startTag.attributes.length > 0 &&
-      child.startTag.attributes.filter(
-        (attr: any) =>
-          attr.key.name.name == 'slot' && attr.key.argument.name == slotValue
-      ).length > 0
+  // remove v-slot:${slotValue}
+  fixOperations.push(OperationUtils.remove(node))
+  // add <template v-slot:${slotValue}>
+  fixOperations.push(
+    OperationUtils.insertTextBefore(target, `<template v-slot:${slotValue}>`)
   )
-
-  if (matchedSlot != null && matchedSlot.length > 0) {
-    fixOperations.push(OperationUtils.remove(target))
-  } else {
-    fixOperations.push(OperationUtils.remove(node))
-    fixOperations.push(
-      OperationUtils.insertTextBefore(target, `<template v-slot:${slotValue}>`)
-    )
-    fixOperations.push(OperationUtils.insertTextAfter(target, `</template>`))
-  }
+  // add </template>
+  fixOperations.push(OperationUtils.insertTextAfter(target, `</template>`))
 
   return fixOperations
 }
