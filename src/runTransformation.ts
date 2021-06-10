@@ -20,10 +20,6 @@ type JSTransformation = Transform & {
   parser?: string | Parser
 }
 
-// type NewVueTransformation = VueTransformation & {
-//   parser?: string | Parser
-// }
-
 type JSTransformationModule =
   | JSTransformation
   | {
@@ -34,41 +30,33 @@ type JSTransformationModule =
 type VueTransformationModule =
   | VueTransformation
   | {
-      default: VueTransformation
+      default: VueTransformation,
+      parser?: string | Parser
     }
 
 type TransformationModule = JSTransformationModule | VueTransformationModule
 
 export default function runTransformation(
-  fileInfo: FileInfo,
+  fileInfo: FileInfo, // 自定义 FileInfo 类型
   transformationModule: TransformationModule,
   params: object = {}
 ) {
-  let transformation: any // VueTransformation | JSTransformation
+  let transformation: VueTransformation | JSTransformation
   // @ts-ignore
   if (typeof transformationModule.default !== 'undefined') {
     // @ts-ignore
     transformation = transformationModule.default
   } 
-  // else {
-  //   transformation = transformationModule
-  // }
+  else {
+    // @ts-ignore
+    transformation = transformationModule
+  }
   
   if (transformation.type === 'vueTransformation') {
     debug('TODO: Running VueTransformation')
     console.log('TODO: Running VueTransformation')
     // 从 fileInfo 中取出文件路径和源码
-    // const { path, source } = fileInfo
-
-    const j = jscodeshift.withParser('babylon')
-    const api = {
-      j,
-      jscodeshift: j,
-      stats: () => {},
-      report: () => {},
-    }
-    // 其实第二个参数 api 无用
-    const out = transformation(fileInfo, api, params) // 用vueTransformation 对文件进行处理
+    const out = transformation(fileInfo, params) // 用vueTransformation 对文件进行处理
 
     return out
   } else {

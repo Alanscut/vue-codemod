@@ -2,7 +2,6 @@ import type VueTransformation from '../src/VueTransformation'
 
 type VueTransformationModule = {
   default: VueTransformation
-  parser?: string
 }
 
 const transformationMap: {
