@@ -69,6 +69,6 @@ export const transformAST: ASTTransformation = (context) => {
     removeExtraneousImport(context, { localBinding: localStore })
   }
 }
-
+// 每个loadModule 获取的就是 wrap 函数返回的 transform
 export default wrap(transformAST)
 export const parser = 'babylon'

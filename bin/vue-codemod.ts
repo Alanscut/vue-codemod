@@ -32,7 +32,7 @@ const { _: files, transformation: transformationName, params } = yargs
 // TODO: port the `Runner` interface of jscodeshift
 async function main() {
   const resolvedPaths = globby.sync(files as string[])
-  const transformationModule = loadTransformationModule(transformationName)
+  const transformationModule = loadTransformationModule(transformationName) // 加载从命令行中传入的规则名对应的规则模块
 
   log(`Processing ${resolvedPaths.length} files…`)
   // 批量文件依次转换
@@ -46,7 +46,7 @@ async function main() {
     try {
       const result = runTransformation(
         fileInfo,
-        transformationModule,
+        transformationModule, // 真正进行规则变化的逻辑就是这个 transformationModule 模块
         params as object
       )
       fs.writeFileSync(p, result) // 处理后的文件内容回写

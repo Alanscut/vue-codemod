@@ -88,26 +88,27 @@ export default function runTransformation(
       typeof parserOption === 'string' ? getParser(parserOption) : parserOption
   }
 
-  const j = jscodeshift.withParser(parser)  // 使用指定的parser
+  const j = jscodeshift.withParser(parser)  // 使用指定的parser，每个规则文件最后一行指定的 babylon
   const api = {
     j,
     jscodeshift: j,
     stats: () => {},
     report: () => {},
   }
-
-  const out = transformation(fileInfo, api, params) // 这一部分处理的是script的内容
+  // 此处的 transformation 也就是 前面loadModule 里返回的 transform，一个匿名函数 (file: FileInfo, api: API, options: Options): string 
+  const out = transformation(fileInfo, api, params) // 这一部分处理的是script的内容，将 jscodeshift 的 API 通过 api 参数传递
   if (!out) {
-    return source // skipped
+    return source // skipped，如果 out 为空，说明没有文本被转换了，所以直接返回原始文本 source
   }
 
   // need to reconstruct the .vue file from descriptor blocks
+  // 如果是 .vue 文件，只转换了 script 部分的代码，需要重新恢复
   if (extension === '.vue') {
     if (out === descriptor!.script!.content) {
-      return source // skipped, don't bother re-stringifying
+      return source // skipped, don't bother re-stringifying  如果script部分代码没变，那么仍然直接返回原始文本
     }
 
-    descriptor!.script!.content = out
+    descriptor!.script!.content = out // 现在把转换后的 out 赋值给 .vue 文件的 script 部分
     return stringifySFC(descriptor!)  // 将修改后script部分的源码回写到.vue文件中，其中的 template 部分保持不变
   }
 
