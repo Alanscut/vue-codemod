@@ -31,7 +31,6 @@ type VueTransformationModule =
   | VueTransformation
   | {
       default: VueTransformation,
-      parser?: string | Parser
     }
 
 type TransformationModule = JSTransformationModule | VueTransformationModule
@@ -46,21 +45,18 @@ export default function runTransformation(
   if (typeof transformationModule.default !== 'undefined') {
     // @ts-ignore
     transformation = transformationModule.default
-  } 
-  else {
+  } else {
     // @ts-ignore
     transformation = transformationModule
   }
-  
+
   if (transformation.type === 'vueTransformation') {
     debug('TODO: Running VueTransformation')
-    console.log('TODO: Running VueTransformation')
-    // 从 fileInfo 中取出文件路径和源码
-    const out = transformation(fileInfo, params) // 用vueTransformation 对文件进行处理
 
+    const out = transformation(fileInfo, params)
     return out
   } else {
-    debug('Running jscodeshift transform')
+    debug('Running jscodeshift transform')    
 
     const { path, source } = fileInfo
     const extension = (/\.([^.]*)$/.exec(path) || [])[0]

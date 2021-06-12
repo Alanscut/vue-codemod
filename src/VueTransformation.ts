@@ -8,16 +8,8 @@ interface FileInfo {
 interface Options {
   [option: string]: any;
 }
-export default interface VueTransformation {
 
+export default interface VueTransformation {
   (file: FileInfo, options: Options): string | null | undefined | void;
   type: string
-
 }
-
-// export default abstract class VueTransformation {
-//   // TODO:
-  
-// }
-
-
